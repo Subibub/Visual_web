@@ -57,6 +57,22 @@ fig3 = px.bar(avg_values, x="grade", y=["loan_amnt", "int_rate"], barmode="group
               width=400, height=400)
 col3.plotly_chart(fig3)
 
+
+# 평행 좌표 그래프 생성
+fig3_1 = px.parallel_coordinates(df,
+                              dimensions=["loan_amnt", "int_rate", "dti", "fico_avg"],
+                              color=df["grade"].astype("category").cat.codes,  # Grade를 색상으로 표시
+                              labels={"loan_amnt": "Loan Amount",
+                                      "int_rate": "Interest Rate",
+                                      "dti": "DTI Ratio",
+                                      "fico_avg": "FICO Score"},
+                              color_continuous_scale=px.colors.qualitative.Set1
+                              )
+
+fig3_1.update_layout(title_text="LendingClub 대출 특성 평행 좌표 그래프", font_size=12)
+st.plotly_chart(fig3_1)
+
+
 # 2.대출 목적(Treemap) & 주택 소유별 대출 금액
 st.subheader("📊 대출 목적 및 주택 소유별 대출 금액")
 col4, col5 = st.columns([1.5, 1])  # 첫 번째 컬럼을 더 넓게 설정
@@ -91,6 +107,7 @@ fig7 = px.line(yearly_summary, x="year", y="loan_amnt",
                title="연도별 대출 승인 금액 추이",
                width=1200, height=500)
 st.plotly_chart(fig7)
+
 
 # 5. 대출 기간(Term)별 평균 이자율 (도넛 차트)
 st.subheader("📊 대출 기간별 평균 이자율")
