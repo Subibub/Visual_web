@@ -25,9 +25,24 @@ p2p_products = pd.DataFrame({
 st.subheader("📌 P2P 대출 상품 목록")
 st.dataframe(p2p_products)
 
-# 📊 이자율 비교 (막대 그래프)
+#----------------------------
+# 이자율 데이터 정리 함수
+def clean_interest_rate(rate):
+    rate = rate.replace("연 ", "").replace("%", "")  # "연 " 및 "%" 제거
+    if "~" in rate:
+        low, high = map(float, rate.split("~"))  # 범위가 있을 경우 평균값 계산
+        return (low + high) / 2
+    return float(rate)  # 단일 값이면 float 변환
+
+# 이자율 변환 적용
+p2p_products["평균 이자율"] = p2p_products["이자율"].apply(clean_interest_rate)
+
+# Streamlit 대시보드 설정
+st.title("📊 P2P 대출 상품 비교 대시보드")
+
+# 평균 이자율 바 차트
 st.subheader("📊 P2P 대출 상품별 평균 이자율 비교")
-st.bar_chart(p2p_products.set_index("상품명")["이자율"].str.replace("연 ", "").str.replace("%", "").astype(float))
+st.bar_chart(p2p_products.set_index("상품명")["평균 이자율"])
 
 # 📌 P2P 투자자의 역할 설명
 st.subheader("📌 P2P 투자자의 역할")
