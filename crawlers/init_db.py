@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS loan_products (
     name TEXT,
     rate TEXT,
     description TEXT,
-    image_url TEXT
 )
 """)
 
@@ -24,12 +23,12 @@ CREATE TABLE IF NOT EXISTS loan_products (
 cursor.execute("SELECT COUNT(*) FROM loan_products")
 if cursor.fetchone()[0] == 0:
     sample_products = [
-        ("개인 신용 대출", "연 4.5%", "신용 등급에 따라 차등 적용", "https://source.unsplash.com/300x200/?money,finance"),
-        ("소상공인 대출", "연 3.8%", "사업 운영자를 위한 맞춤 대출", "https://source.unsplash.com/300x200/?business,loan"),
-        ("주택 담보 대출", "연 2.9%", "부동산 담보 제공 시 가능", "https://source.unsplash.com/300x200/?house,mortgage"),
-        ("자동차 대출", "연 5.2%", "신차 및 중고차 구입 시", "https://source.unsplash.com/300x200/?car,loan")
+        ("개인 신용 대출", "연 4.5%", "신용 등급에 따라 차등 적용"),
+        ("소상공인 대출", "연 3.8%", "사업 운영자를 위한 맞춤 대출"),
+        ("주택 담보 대출", "연 2.9%", "부동산 담보 제공 시 가능"),
+        ("자동차 대출", "연 5.2%", "신차 및 중고차 구입 시")
     ]
-    cursor.executemany("INSERT INTO loan_products (name, rate, description, image_url) VALUES (?, ?, ?, ?)", sample_products)
+    cursor.executemany("INSERT INTO loan_products (name, rate, description) VALUES (?, ?, ?, ?)", sample_products)
 
 # 📌 변경 사항 저장 후 종료
 conn.commit()
