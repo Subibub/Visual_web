@@ -1,10 +1,24 @@
 import streamlit as st
+from navigation import load_navbar  # 공통 네비게이션 바 불러오기
+from login_handler import init_login_state, handle_login, handle_logout # 로그인 처리 함수 불러오기
+import time
 import pandas as pd
 import requests
 from streamlit_lottie import st_lottie
 
 # 페이지 설정
-st.set_page_config(page_title="LendSure 대출 상품", layout="wide")
+st.set_page_config(page_title="대출 상품-LendSure", layout="wide")
+
+# 로그인 상태 초기화
+init_login_state()
+
+# 네비게이션 바 로드
+load_navbar()  
+
+# 로그인 / 로그아웃 처리
+handle_login()
+handle_logout()
+
 
 # Lottie 애니메이션 불러오기
 lottie_url = "https://assets3.lottiefiles.com/packages/lf20_kxsd2ytq.json"
@@ -17,29 +31,6 @@ def load_lottie(url):
 
 lottie_animation = load_lottie(lottie_url)
 
-# 네비게이션 바
-st.markdown(
-    """
-    <style>
-        .top-nav {
-            background-color: #E3F2FD;
-            padding: 10px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-    </style>    
-    """,
-    unsafe_allow_html=True
-)
-st.markdown(
-    """
-    <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: white;">LENDSURE</a>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 
 # 배경 스타일 적용 (높이를 더 크게 조정)
@@ -51,9 +42,8 @@ st.markdown(
             <p>신뢰할 수 있는 렌드슈어에서 최적의 대출을 찾아보세요.</p>
         </div>
         <div style="flex: 1; text-align: right;">
-            <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png" alt="People Icon"/>
+            <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" alt="Loan Icon" width="250    
         </div>
-    </div>
     """,
     unsafe_allow_html=True
 )
@@ -129,18 +119,49 @@ for row in rows:
             st.markdown(
                 f"""    
                 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin: 10px; 
-                            background-color: white; text-align: center; 
+                            background-color: white; text-align: center;
                             box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                            font-family: Arial, sans-serif;">                    
-                    <img src="{icon_urls[item["상품명"]]}" alt="Loan Icon"/>
-                    <h3 style="color: #4A90E2;">{item["상품명"]}</h3>
-                    <p><strong>최저금리:</strong> {item["최저금리"]}</p>
-                    <p><strong>최대한도:</strong> {item["최대한도"]}</p>
+                            font-family: Arial, sans-serif;">
+                    <img src="{icon_urls[item['상품명']]}" alt="Loan Icon"/>
+                    <h3 style="color: #4A90E2;">{item['상품명']}</h3>
+                    <p><strong>최저금리:</strong> {item['최저금리']}%</p>
+                    <p><strong>최대한도:</strong> {item['최대한도']}만원</p>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
+            # 자동으로 리뷰 & 평가 Expander 추가
+            with st.expander(f"💬 {item['상품명']} 리뷰 & 평가"):
+                st.write("💡리뷰")
+                existing_reviews = ["금리가 저렴해서 좋았어요!", "신청이 간편했습니다."]
+                existing_ratings = [5, 4]
+                for review, rating in zip(existing_reviews, existing_ratings):
+                    st.write(f"{review} ({'⭐' * rating})")
+
+                new_review = st.text_input(f"💬 {item['상품명']} 리뷰 작성", key=f"review_{idx}")
+                new_rating = st.slider(f"🌟 평점 (1~5)", 1, 5, 5, key=f"rating_{idx}")
+                if st.button(f"✅ 리뷰 제출", key=f"submit_{idx}"):
+                    st.write(f"🎉 '{new_review}' 리뷰가 등록되었습니다! (평점: {'⭐' * new_rating})")
 
 
+#  대출 시뮬레이션 기능
+with st.expander("📊 대출 시뮬레이션 "):
+    st.subheader("💰 대출 상환금 계산")
+    loan_amt = st.number_input("대출 금액 (만원)", min_value=100, max_value=10000, value=1000)
+    interest_rate = st.slider("연 이자율 (%)", min_value=1.0, max_value=20.0, value=5.0, step=0.1)
+    loan_term = st.slider("대출 기간 (년)", min_value=1, max_value=10, value=3)
+    
+    # 월 상환금 및 총 상환액 계산
+    monthly_rate = (interest_rate / 100) / 12
+    num_payments = loan_term * 12
+    if monthly_rate > 0:
+        monthly_payment = loan_amt * (monthly_rate * (1 + monthly_rate) ** num_payments) / ((1 + monthly_rate) ** num_payments - 1)
+        total_payment = monthly_payment * num_payments
+    else:
+        monthly_payment = loan_amt / num_payments
+        total_payment = loan_amt
+    
+    st.write(f"월 예상 상환금: {monthly_payment:.2f} 만원")
+    st.write(f"총 상환 금액: {total_payment:.2f} 만원")
 

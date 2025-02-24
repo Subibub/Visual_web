@@ -1,22 +1,28 @@
 import streamlit as st
+from navigation import load_navbar  # 공통 네비게이션 바 불러오기
+from login_handler import init_login_state, handle_login, handle_logout # 로그인 처리 함수 불러오기
 import json
 import os
 from streamlit_lottie import st_lottie
 import time
 
 
-
 # 페이지 기본 설정
 st.set_page_config(page_title="LendSure", layout="wide")
 
-# 초기 세션 상태 설정
-if "show_login" not in st.session_state:
-    st.session_state.show_login = False
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "username" not in st.session_state:
-    st.session_state.username = ""
+# 로그인 상태 초기화
+init_login_state()
 
+# 네비게이션 바 로드
+load_navbar()  
+
+# 로그인 / 로그아웃 처리
+handle_login()
+handle_logout()
+
+
+
+#----------------------------------------------------------
 # Lottie 애니메이션 로드 함수
 def load_lottie(filepath: str):
     try:
@@ -42,34 +48,64 @@ st.markdown("""
             scroll-behavior: smooth;
             margin: 0;
         }
-        .section {
-            height: 100vh;
+        .top-bg {
+            text-align: center;
+            padding: 80px 20px;
+            border-radius: 10px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            font-size: 28px;
+    
+        }
+        .top-bg h1 {
+            font-family:"Alegreya", serif;
+            font-size: 80px;
             font-weight: bold;
+            color: #08298A;
+            margin-bottom: 15px;
         }
-        .middle {
-            padding-top: 0;
-            height: auto;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .top-bg p {
+            font-style: normal;
+            font-size: 26px;
+            color:gray;
+            margin-top: 0;
+            margin-bottom: 25px;
         }
-        .container0{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 30px 0;
+        .top-bg a {
+            background-color: #0F4C75;
+            padding: 18px 35px;
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+            border-radius: 25px;
+            transition: background-color 0.3s ease-in-out;
         }
-        
+        .top-bg a:hover {
+            background-color: #BBE1FA;
+        }
+        [data-testid="stHeaderActionElements"] {
+            display: none !important;
+        }
+        .title {
+            font-size: 50px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: -40px; /* 중앙보다 살짝 위로 이동 */
+        }
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .right-section {
+            flex: 1;
+            text-align: left;
+        }
         .button {
-            background-color: #1E40AF;
+            background-color: #0F4C75;
             color: white;
             font-size: 18px;
             padding: 12px 25px;
@@ -83,108 +119,53 @@ st.markdown("""
         .button-container {
             margin-top: 10px;
         }
-        .cards {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 55%;
-        }
-        .card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            width: 200px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .card-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
-        .card-subtitle {
-            font-size: 16px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .card:hover {
-            transform: translateY(-10px);
-        }
-        .top-bg1 {
-            text-align: center;
-            background-color: white;
-            padding: 60px 20px;
-            border-radius: 10px;
-        }
-        .bottom-section {
+        .section {
             height: 100vh;
-            background-color: #2E9AFE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* 세로 가운데 정렬 */
+            padding: 20px
+        }
+        .animation-container {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            align-items: center;
+            align-self: flex-start; /* 컨테이너 내에서 왼쪽 정렬 */
+        }
+        .animation-container canvas {
+            max-width: 600px;
+            height: auto;
+            margin-left: 0 !important; /* 중앙 정렬을 강제로 해제하고 왼쪽 정렬 */
+        }
+        .left-section {
+            flex: 1; /* 왼쪽 섹션의 너비 */
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            align-items: center; /* 이미지 세로 가운데 정렬 */
+        }
+        .button {
+            background-color: #0F4C75;
             color: white;
-            padding: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .content-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 90%;
-            max-width: 1200px;
-        }
-        .bottom-left {
-            font-size: 42px;
-            font-weight: bold;
-            color: #222;
-            margin-right: 50px;
-        }
-        .bottom-right {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-        }
-        .stat-text {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        #dynamic-stats {
+            font-size: 18px;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
             display: inline-block;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 50px; /* "렌딧의 현재"와 간격 추가 */
         }
-        .stMarkdown {
-            display: inline-block !important;
-        }
-        .stColumn {
-            padding: 0 !important;
-        }
-        .stat-content {
-            display: flex;
-            flex-direction: column;
-        }
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-        .stat-label {
-            font-size: 16px;
-            color: #ffffff;
-        }
-        .footer {
-            text-align: center; margin-top: 60px; font-size: 14px; color: #585858;
+        .button-container {
+            margin-top: 10px;
         }
         .big-font {
             font-size:50px !important;
@@ -226,202 +207,16 @@ st.markdown("""
             font-size: 18px;
             color: gray;
         }
-        .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between; /* 좌우 배치 */
-            gap: 50px;
-            padding: 60px 20px;
-            width: 100%;
-        }
-        .animation-container {
-            flex: 1;
-            display: flex;
-            justify-content: flex-start; /* 왼쪽 정렬 */
-            align-items: center;
-            align-self: flex-start; /* 컨테이너 내에서 왼쪽 정렬 */
-        }
-        .animation-container canvas {
-            max-width: 600px;
-            height: auto;
-            margin-left: 0 !important; /* 중앙 정렬을 강제로 해제하고 왼쪽 정렬 */
-        }
-        .left-section {
-            flex: 1;
-            display: flex;
-            justify-content: flex-start; /* 왼쪽 정렬 */
-            align-items: center;
-        }
+        
         
     </style>
 """, unsafe_allow_html=True)
-
-#--------------네비게이션 바------------------#
-st.markdown(f"""
-    <style>
-        /* 네비게이션 바 스타일 */
-        .navbar {{
-            display: flex;
-            justify-content: space-between; /* 로고와 메뉴 양쪽 정렬 */
-            align-items: center;
-            background-color: black;
-            padding: 15px 30px;
-        }}
-        .logo {{
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            font-family: "Alegreya", serif;
-        }}
-        .nav-links {{
-            display: flex;
-            gap: 20px; /* 메뉴 간격 조정 */
-        }}
-        .nav-links a, .nav-item {{
-            color: white !important;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 10px 15px;
-        }}
-        .nav-item {{
-            position: relative;
-            cursor: pointer;
-        }}
-        /* 드롭다운 기본 상태 */
-        .dropdown {{
-            opacity: 0;               /* 처음엔 투명 */
-            visibility: hidden;       /* 처음엔 보이지 않음 */
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white;
-            min-width: 220px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-            padding: 10px;
-            z-index: 10002;
-            border-radius: 5px;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; 
-            /* 투명도와 visibility를 0.3초 동안 부드럽게 변경 */
-        }}
-
-        /* 드롭다운 아이템 스타일 */
-        .dropdown a {{
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: black !important;
-            font-weight: bold;
-        }}
-        .dropdown a:hover {{
-            background-color: #f0a500;
-            color: white;
-        }}
-
-        /* 마우스가 nav-item 또는 dropdown에 올라가 있을 때 */
-        .nav-item:hover .dropdown,
-        .dropdown:hover {{
-            opacity: 1;            /* 투명도 1 (보이게) */
-            visibility: visible;   /* 표시 */
-        }}    
-    </style>
-
-    <div class="navbar">
-        <div class="logo">
-            LendSure
-        </div>
-        <div class="nav-links">
-            <span class="nav-item">대출
-                <div class="dropdown">
-                    <a href="/search_credit" target = "_self">간단한 금리 및 한도 조회</a>
-                    <a href="/dashboard" target = "_self">시각화</a>
-                </div>
-            </span>
-            <a href="/invest" target = "_self">투자</a>
-            <a href="/cs" target = "_self">고객상담</a>
-            <a href="?login=true" class="nav-link">로그인</a>
-        </div>
-    </div>
-    """, 
-unsafe_allow_html=True,
-)
-
-
     
-#------------로그인 폼 및 로그아웃 처리------------------#
-# 로그인 창 표시 여부
-if st.query_params.get("login") == "true":
-    st.session_state.show_login = True
-
-# 로그인 창 (모달 스타일)
-if st.session_state.show_login and not st.session_state.logged_in:
-    st.markdown("### 로그인")
-    
-    username = st.text_input("아이디:")
-    password = st.text_input("비밀번호:", type="password")
-
-    if st.button("로그인"):
-        if username == "admin" and password == "1234":  # 예제용 간단한 로그인 검증
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.session_state.show_login = False
-            st.success("로그인 성공! 회사 페이지로 이동합니다.")
-            time.sleep(1)  # Give time for the success message to show
-            st.query_params.clear()  # Clear query parameters
-            st.switch_page("pages/company.py")
-
-
 
 #-----------------------------------------페이지 구성 요소--------------------------------------------#
 # --------------상단 섹션: 회사 정보 (회사명 & 슬로건)------------------#
 # 상단 섹션 : 회사 정보 (회사명 & 슬로건)
 st.markdown("""
-    <style>
-        .top-bg {
-            text-align: center;
-            background-color: white;
-            padding: 80px 20px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-    
-        }
-        .top-bg h1 {
-            font-family:"Alegreya", serif;
-            font-size: 80px;
-            font-weight: bold;
-            color: #08298A;
-            margin-bottom: 15px;
-        }
-        .top-bg p {
-            font-family:   font-family: "Gowun Dodum", serif;
-            font-weight: 400;
-            font-style: normal;
-            font-size: 26px;
-            color:gray;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
-        .top-bg a {
-            background-color: #08298A;
-            padding: 18px 35px;
-            color: white;
-            text-decoration: none;
-            font-size: 22px;
-            border-radius: 25px;
-
-
-            transition: background-color 0.3s ease-in-out;
-        }
-        .top-bg a:hover {
-            background-color: #06417d;
-        }
-        [data-testid="stHeaderActionElements"] {
-            display: none !important;
-        }
-    </style>         
-    
     <div id="top" class="section top-bg">
         <h1>LendSure</h1>
         <p>신뢰할 수 있는 금융 파트너, 당신과 함께합니다.</p>
@@ -431,69 +226,40 @@ st.markdown("""
     unsafe_allow_html=True
 )
 
-# --------------중단 섹션: 대출 상품 캐러셀------------------#
-# UI 레이아웃
-st.markdown('<div class="container">', unsafe_allow_html=True)
+# --------------중단 섹션------------------#
+col1, col2 = st.columns(2)
 
-# 왼쪽 애니메이션 영역 (크기 조정 + 정렬 개선)
-st.markdown('<div class="left-section">', unsafe_allow_html=True)
-if lottie_animation:
-    st_lottie(lottie_animation, speed=1, height=500, key="investment_graph")  # 크기 조정 (height=350)
-else:
-    st.warning("애니메이션을 표시할 수 없습니다. JSON 파일을 확인하세요.")
-st.markdown('</div>', unsafe_allow_html=True)
+with col1:
+    st.image("data/invest.png", use_container_width=True)
 
-st.markdown('</div>', unsafe_allow_html=True)  # 전체 컨테이너 닫기
+# Right column: text and button
+with col2:
+    st.markdown("## 분산투자를 통한 안정적인 투자")
+    st.markdown("렌드슈어에서는 분산투자가 가능하여\n투자의 안정성과 수익성이 높아집니다.")
+    st.button("투자 상품 보기")
 
-
-# 오른쪽: 텍스트 설명
-st.markdown('<div class="right-section">', unsafe_allow_html=True)
-
-st.markdown(
-    """
+# Custom CSS for styling
+st.markdown("""
     <style>
-        .title {
-            font-size: 50px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: -40px; /* 중앙보다 살짝 위로 이동 */
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
         }
-
-        .subtitle {
+        
+        .stButton > button {
+            background-color: #0F4C75;
+            color: white;
             font-size: 18px;
-            color: #666;
-            max-width: 600px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-        .right-section {
-            width: 40%;
-            text-align: left;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 50px; /* "렌딧의 현재"와 간격 추가 */
         }
     </style>
-    <div class="title">분산투자를 통한 안정적인 투자</div>
-    <div class="subtitle">
-        렌드슈어에서는 분산투자가 가능하여 <br>
-        투자의 안정성과 수익성이 높아집니다.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-# 버튼 추가
-st.markdown(
-    """
-    <div class="button-container">
-        <a href="invest" target="_self">
-            <button class="button">투자 상품 보기</button>
-        </a>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-
-
-
+""", unsafe_allow_html=True)
 # --------------하단 섹션: 회사 성장 데이터------------------#
 # 제목
 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -517,24 +283,8 @@ st.markdown(
 st.write("")
 # 날짜 정보
 st.markdown('<p class="footer">렌드슈어 내부 데이터 기준 (2025년 2월 23일)</p>', unsafe_allow_html=True)
-# 버튼
-st.markdown(
-    """
-    <div style="text-align: center;">
-        <a href="search_credit" target="_blank">
-            <button style="
-                background-color: #4cc9a2;
-                color: white;
-                border: none;
-                padding: 15px 30px;
-                font-size: 18px;
-                border-radius: 25px;
-                cursor: pointer;
-            ">1분만에 대출한도 알아보기</button>
-        </a>
-    </div>
-    """,
-    unsafe_allow_html=True )
+st.markdown('<p class = "sub-text">렌드슈어는 지금도 성장하고 있습니다.</p>', unsafe_allow_html=True)
+
 
 
 st.write("")

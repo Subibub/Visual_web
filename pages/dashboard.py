@@ -1,4 +1,8 @@
 import streamlit as st
+from navigation import load_navbar  # 공통 네비게이션 바 불러오기
+from login_handler import init_login_state, handle_login, handle_logout # 로그인 처리 함수 불러오기
+import time
+import json
 import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -6,56 +10,20 @@ import altair as alt
 import plotly.graph_objects as go
 
 # 페이지 설정
-st.set_page_config(page_title="대출 데이터 대시보드",layout="wide")
+st.set_page_config(page_title="대출 데이터 대시보드-LendSure",layout="wide")
 
-# 스타일 적용 
-st.markdown(
-    """
-    <style>
-        body {
-            background-color: #121212;
-            color: white;
-        }
-        .top-nav {
-            background-color: #f8f9fa;
-            padding: 10px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .sub-navbar {
-            text-align: center;
-            font-size: 18px;
-            padding: 10px;
-            border-bottom: 2px solid #ddd;
-        }
-        .popup {
-            background-color: #2c2c2c;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# 로그인 상태 초기화
+init_login_state()
 
-# 네비게이션 바
-st.markdown(
-    """
-    <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: black;">LENDSURE</a>
-    </div>
-    <div class="sub-navbar">
-        LendSure 고객정보
-    </div>
-    <br><br><br><br>
-    """,
-    unsafe_allow_html=True
-)
+# 네비게이션 바 로드
+load_navbar()  
 
-# 데이터 로드 함수
+# 로그인 / 로그아웃 처리
+handle_login()
+handle_logout()
+
+#------------ 데이터 로드--------------------------------
+# 데이터 로드 함드
 @st.cache_data
 def load_data():
     try:
@@ -74,34 +42,132 @@ def load_data():
 
 df = load_data()
 
+#--------CSS 스타일 적용 네비게이션 바 --------
+st.markdown(
+    """
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+        .top-nav {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .sub-navbar {
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 30px;
+            border-bottom: 2px solid #ddd;
+        }
+        .popup {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+# ---- CSS 스타일  주요금융지표  ----
+st.markdown("""
+    <style>
+        .metric-box {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .metric-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            text-align: center;
+        }
+        .metric-title {
+            font-size: 16px;
+            color: #6c757d;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;  /* 파란색 강조 */
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
 
 #================================================================================================
 #대시보드 생성
 #주요 금융 지표 요약
 st.subheader(" 주요 금융 지표")
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("평균 이자율", f"{df['int_rate'].mean():.2f}%")
-with col2:
-    st.metric("평균 대출 금액", f"${df['loan_amnt'].mean():,.0f}")
-with col3:
-    st.metric("평균 신용 점수", f"{df['fico_avg'].mean():.0f}")
-
+st.markdown(f"""
+    <div class="metric-box">
+        <div class="metric-card">
+            <div class="metric-title">평균 이자율</div>
+            <div class="metric-value">{df['int_rate'].mean():.2f}%</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">평균 대출 금액</div>
+            <div class="metric-value">${df['loan_amnt'].mean():,.0f}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">평균 신용 점수</div>
+            <div class="metric-value">{df['fico_avg'].mean():.0f}</div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 #공간 여유 확보 
 st.write("")
 st.write("")
+#------------------대출금액, 이자율 확인해보기-------------------------
+# 팝업 창 - 신용 점수 입력
+if "popup" not in st.session_state:
+    st.session_state.popup = False
 
+if st.button("나의 신용 점수 입력"):
+    st.session_state.popup = True
+
+if st.session_state.popup:
+    with st.form("user_info_form"):
+        fico_score = st.slider("내 신용 점수 입력", 300, 850, 700)
+        submitted = st.form_submit_button("확인")
+        if submitted:
+            st.session_state.popup = False
+            
+            # ±10 범위 내 신용 점수 데이터 찾기
+            filtered_df = df[(df["fico_avg"] >= fico_score - 10) & (df["fico_avg"] <= fico_score + 10)]
+            
+            if filtered_df.empty:
+                st.write("해당 신용 점수를 가진 데이터가 없습니다.")
+            else:
+                avg_loan = filtered_df["loan_amnt"].mean()
+                avg_rate = filtered_df["int_rate"].mean()
+                st.subheader("나와 비슷한 신용 점수의 평균 대출 금액 & 이자율")
+                st.metric("평균 대출 금액", f"${avg_loan:,.0f}")
+                st.metric("평균 이자율", f"{avg_rate:.2f}%")
 #-------------------------------------------
 #주제별 시각화 
 # 1. 대출 상태별 
 st.subheader(" 대출 상태별 분석")
 col1, col2, col3 = st.columns([1, 1, 1])  # 3개 컬럼 배치
 
-fig1 = px.pie(df, names="loan_status", title="대출 연체 비율", width=400, height=400)
+df_copy = df.copy()
+df_copy['loan_status'] = df_copy['loan_status'].map({0: "완납", 1: "연체"})
+fig1 = px.pie(df_copy, names="loan_status", title="대출 연체 비율", width=400, height=400)       
 col1.plotly_chart(fig1)
 
 # 대출 상태별 평균 신용 점수 및 평균 이자율 계산
-loan_status_avg = df.groupby("loan_status").agg({"fico_avg": "mean", "int_rate": "mean"}).reset_index()
+loan_status_avg = df_copy.groupby("loan_status").agg({"fico_avg": "mean", "int_rate": "mean"}).reset_index()
 
 # 대출 상태별 평균 신용 점수 시각화
 fig1_1 = px.bar(loan_status_avg, x="loan_status", y="fico_avg", color="loan_status",
@@ -133,32 +199,6 @@ fig2_2 = px.bar(avg_values, x="grade", y=["loan_amnt", "int_rate"], barmode="gro
               width=400, height=400)
 col2.plotly_chart(fig2_2)
 
-# 팝업 창 - 신용 점수 입력
-if "popup" not in st.session_state:
-    st.session_state.popup = False
-
-if st.button("나의 신용 점수 입력"):
-    st.session_state.popup = True
-
-if st.session_state.popup:
-    with st.form("user_info_form"):
-        fico_score = st.slider("내 신용 점수 입력", 300, 850, 700)
-        submitted = st.form_submit_button("확인")
-        if submitted:
-            st.session_state.popup = False
-            
-            # ±10 범위 내 신용 점수 데이터 찾기
-            filtered_df = df[(df["fico_avg"] >= fico_score - 10) & (df["fico_avg"] <= fico_score + 10)]
-            
-            if filtered_df.empty:
-                st.write("해당 신용 점수를 가진 데이터가 없습니다.")
-            else:
-                avg_loan = filtered_df["loan_amnt"].mean()
-                avg_rate = filtered_df["int_rate"].mean()
-                st.subheader("나와 비슷한 신용 점수의 평균 대출 금액 & 이자율")
-                st.metric("평균 대출 금액", f"${avg_loan:,.0f}")
-                st.metric("평균 이자율", f"{avg_rate:.2f}%")
-
 # 평행 좌표 그래프 생성
 # 사용자가 보고 싶은 신용 점수 범위 선택
 fico_min, fico_max = st.slider("신용 점수 범위 선택", min_value=int(df["fico_avg"].min()), 
@@ -187,11 +227,34 @@ st.plotly_chart(fig3_1)
 st.subheader("대출 목적 및 주택 소유별 대출 금액")
 col4, col5 = st.columns([1.5, 1])  # 첫 번째 컬럼을 더 넓게 설정
 # 대출 목적별 평균 대출 금액 계산
+# 대출 목적 그룹화 (Home, Credit, Personal)
+category_mapping = {
+    "house": "Home",
+    "home_improvement": "Home",
+    
+    "credit_card": "Credit",
+    "debt_consolidation": "Credit",
+
+    "wedding": "Personal",
+    "vacation": "Personal",
+    "moving": "Personal",
+    "medical": "Personal",
+    "other": "Personal",
+    "major_purchase": "Personal",
+    "small_business": "Personal",
+    "car": "Personal"
+}
+
+# 새로운 'parent' 컬럼 추가 (데이터프레임 원본 변경 없이 복사본 사용)
 purpose_avg = df.groupby("purpose")["loan_amnt"].mean().reset_index()
 
-fig4 = px.treemap( purpose_avg, path=["purpose"], values="loan_amnt",
+purpose_avg_copy = purpose_avg.copy()
+purpose_avg_copy["parent"] = purpose_avg_copy["purpose"].map(category_mapping).fillna("Others")
+fig4 = px.treemap( purpose_avg_copy, path=["parent","purpose"], values="loan_amnt",
                   title="대출 목적별 평균 대출 금액",
-                  width=600, height=450)
+                  width=600, height=450,
+                  )
+
 #트리맵 설정 
 fig4.update_traces(
     textinfo="label+value+percent entry",  # 대출 목적 + 평균 대출 금액 + 비율(%)
@@ -219,11 +282,21 @@ state_summary.rename(columns={"loan_status": "Delinquency_rate"}, inplace=True)
 # 지도 기반 대출 현황 시각화
 fig6 = px.choropleth(state_summary, locations="addr_state", locationmode="USA-states",
                      color="Delinquency_rate",
-                     hover_name="addr_state",
-                     hover_data={"loan_amnt": True, "int_rate": True, "Delinquency_rate": True},
+                    hover_name="addr_state",
+                    hover_data={
+                        "loan_amnt": True, 
+                        "int_rate": True, 
+                        "Delinquency_rate": True},                    
                      scope="usa", title="지역별 부실율 및 대출현황 ",
                      width=1200, height=600, color_continuous_scale="Blues")
-
+fig6.add_scattergeo(
+    locations=state_summary["addr_state"],
+    text=state_summary["addr_state"],  # 상태 약자 텍스트 추가
+    mode="text",  # 텍스트만 표시
+    showlegend=False,
+    locationmode="USA-states",
+    textfont=dict(size=12, color="black")  # 텍스트 스타일 설정
+)
 st.plotly_chart(fig6)
 
 #-------------------------------------------
@@ -239,25 +312,34 @@ st.plotly_chart(fig7)
 
 #-------------------------------------------
 # 5. 대출 기간(Term)별 분석 
-col6, col7 = st.columns([1, 1])  # 첫 번째 컬럼을 더 넓게 설정
-
 st.subheader("대출 기간별 분석")
+col6, col7 = st.columns([1, 1]) 
 
-avg_interest_by_term = df.groupby("term")["int_rate"].mean().reset_index()
-fig8 = px.pie(avg_interest_by_term, names="term", values="int_rate",
-              title="대출 기간별 평균 이자율", hole=0.6,
-              width=500, height=450)
+# 박스플롯 만들기 -대출기간별 이자율
+fig8 = px.box(
+    df, 
+    x="term", 
+    y="int_rate", 
+    title="대출 기간별 이자율 분포", 
+    labels={"term": "대출 기간", "int_rate": "이자율 (%)"},
+    width=500, 
+    height=450
+)
 col6.plotly_chart(fig8)
 
-# 반원게이트 차트 만들기 -대출기간별 평균 대출 금액 
-avg_amt_by_term = df.groupby("term")["loan_amnt"].mean().reset_index()
-fig8_1 = px.pie(avg_amt_by_term, names="term", values="loan_amnt",
-               title="대출 기간별 평균 대출 금액", hole=0.6,
-               width=500, height=450)
+# 박스플롯 만들기 -대출기간별 대출금액
+fig8_1 = px.box(
+    df, 
+    x="term", 
+    y="loan_amnt", 
+    title="대출 기간별 대출 금액 분포", 
+    labels={"term": "대출 기간", "loan_amnt": "대출 금액 ($)"},
+    width=500, 
+    height=450
+)
 col7.plotly_chart(fig8_1)
 
 
-#-------------------------------------------
 # loan_status가 0(완납) / 1(연체)로 표시됨 → 연체율 계산
 df_term_summary = df.groupby("term")["loan_status"].mean().reset_index()
 df_term_summary.columns = ["term", "default_rate"]
@@ -269,7 +351,7 @@ selected_term = st.radio("대출 기간 선택", df_term_summary["term"].tolist(
 # 선택한 기간에 해당하는 부실율 값 가져오기
 selected_rate = df_term_summary[df_term_summary["term"] == selected_term]["default_rate"].values[0]
 
-# 반원 게이지 차트 만들기
+# 반원 게이지 차트 생성
 fig = go.Figure()
 fig.add_trace(go.Indicator(
     mode="gauge+number",
@@ -278,11 +360,11 @@ fig.add_trace(go.Indicator(
     title={'text': f"{selected_term}기간 연체율 (%)"},
     gauge={
         "axis": {"range": [0, 50]},  # 0~50% 부실율 범위
-        "bar": {"color": "darkblue"},  # 바 색상
+        "bar": {"color": "dimgrey"},  # 바 색상    
         "steps": [
-            {"range": [0, 15], "color": "green"},
-            {"range": [15, 30], "color": "orange"},
-            {"range": [30, 50], "color": "red"}
+            {"range": [0, 15], "color": "#e0f7fa"},
+            {"range": [15, 30], "color": "#81d4fa"},
+            {"range": [30, 50], "color": "#0288d1"}
         ],
         "shape": "angular"
     }
@@ -297,8 +379,6 @@ fig.update_layout(
 # 반원 게이지 차트 출력
 st.plotly_chart(fig)
 
-# 추가 정보 출력
-st.markdown(f"### 🔍 {selected_term} 대출의 평균 부실율: **{selected_rate:.2f}%**")
 #-------------------------------------------
 # 6. 대출 금액별 연간 소득 분포 (박스플롯)
 st.subheader("대출 금액별 연간 소득 분포")
@@ -311,9 +391,8 @@ df["income_group"] = pd.cut(df["annual_inc"], bins=bins, labels=labels)
 # 각 그룹별 평균 대출 금액 계산
 grouped_df = df.groupby("income_group")["loan_amnt"].mean().reset_index()
 grouped_df = grouped_df.sort_values("loan_amnt", ascending=False)
-fig9 = px.box(df, x="income_group", y="loan_amnt",
-             title="소득 수준별 대출 금액 분포",
-             points="all")  # 개별 데이터 점 표시
+fig9 = px.violin(df, x="income_group", y="loan_amnt", box =True,
+             title="소득 수준별 대출 금액 분포")  # 개별 데이터 점 표시
 st.plotly_chart(fig9)
 
 

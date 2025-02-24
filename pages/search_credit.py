@@ -1,10 +1,23 @@
 import streamlit as st
+from navigation import load_navbar  # 공통 네비게이션 바 불러오기
+from login_handler import init_login_state, handle_login, handle_logout # 로그인 처리 함수 불러오기
+import time
 import random
 import pandas as pd
 import numpy as np
 
 # 페이지 설정
-st.set_page_config(page_title="금리•한도조회", layout="wide")
+st.set_page_config(page_title="금리•한도조회-LendSure", layout="wide")
+
+# 로그인 상태 초기화
+init_login_state()
+
+# 네비게이션 바 로드
+load_navbar()  
+
+# 로그인 / 로그아웃 처리
+handle_login()
+handle_logout()
 
 # 현재 단계에 따라 스타일 동적 변경
 step = st.session_state.get("step", 1)
@@ -18,13 +31,6 @@ def get_step_style(step_number):
 st.markdown(
     f"""
     <style>
-    .top-nav {{
-        background-color: #f8f9fa;
-        padding: 10px;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-    }}
     .step-nav {{
         text-align: center;
         font-size: 18px;
@@ -48,9 +54,7 @@ st.markdown(
         margin-top: 20px;
     }}
     </style>
-    <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: black;">LENDSURE</a>
-    </div>
+    
     <div class="step-nav">
         <div class="step-container">
             <div class="step" style="{get_step_style(1)}">개인정보 입력 </div>
