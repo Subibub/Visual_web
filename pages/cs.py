@@ -1,6 +1,40 @@
 import streamlit as st
+import json
+import os
+from streamlit_lottie import st_lottie
+import time
 
 st.set_page_config(page_title="고객센터", page_icon="📞", layout="wide")
+
+# 초기 세션 상태 설정
+if "show_login" not in st.session_state:
+    st.session_state.show_login = False
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+#------------로그인 폼 및 로그아웃 처리------------------#
+# 로그인 창 표시 여부
+if st.query_params.get("login") == "true":
+    st.session_state.show_login = True
+
+# 로그인 창 (모달 스타일)
+if st.session_state.show_login and not st.session_state.logged_in:
+    st.markdown("### 로그인")
+    
+    username = st.text_input("아이디:")
+    password = st.text_input("비밀번호:", type="password")
+
+    if st.button("로그인"):
+        if username == "admin" and password == "1234":  # 예제용 간단한 로그인 검증
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.session_state.show_login = False
+            st.success("로그인 성공! 회사 페이지로 이동합니다.")
+            time.sleep(1)  # Give time for the success message to show
+            st.query_params.clear()  # Clear query parameters
+            st.switch_page("pages/company.py")
 
 
 #--------------네비게이션 바------------------#
@@ -72,7 +106,7 @@ st.markdown(f"""
     </style>
 
     <div class="navbar">
-        <div class="logo">LendingClub</div>
+        <div class="logo">LendSure</div>
         <div class="nav-links">
             <span class="nav-item">대출
                 <div class="dropdown">
@@ -80,7 +114,7 @@ st.markdown(f"""
                     <a href="/dashboard" target = "_self">시각화</a>
                 </div>
             </span>
-            <a href="/product" target = "_self">투자</a>
+            <a href = /invest" target = "_self">투자</a>
             <a href="/cs" target = "_self">고객상담</a>
             <a href="?login=true" class="nav-link">로그인</a>
         </div>

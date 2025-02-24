@@ -4,7 +4,7 @@ import requests
 from streamlit_lottie import st_lottie
 
 # 페이지 설정
-st.set_page_config(page_title="P2P 대출 상품", layout="wide")
+st.set_page_config(page_title="LendSure 대출 상품", layout="wide")
 
 # Lottie 애니메이션 불러오기
 lottie_url = "https://assets3.lottiefiles.com/packages/lf20_kxsd2ytq.json"
@@ -35,7 +35,7 @@ st.markdown(
 st.markdown(
     """
     <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: white;">LENDIT</a>
+        <a href="/" style="text-decoration: none; color: white;">LENDSURE</a>
     </div>
     """,
     unsafe_allow_html=True
@@ -47,8 +47,8 @@ st.markdown(
     """
     <div style="background-color:#E3F2FD; padding: 100px; display: flex; align-items: center;">
         <div style="flex: 1;">
-            <h2>합리적인 금리로 빠르고 안전한 대출!</h2>
-            <p>신뢰할 수 있는 금융 상품을 통해 최적의 대출을 찾아보세요.</p>
+            <h2>합리적인 금리로 빠르고 안전한 대출</h2>
+            <p>신뢰할 수 있는 렌드슈어에서 최적의 대출을 찾아보세요.</p>
         </div>
         <div style="flex: 1; text-align: right;">
             <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png" alt="People Icon"/>

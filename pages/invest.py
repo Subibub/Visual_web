@@ -4,7 +4,7 @@ import requests
 
 
 # 페이지 설정
-st.set_page_config(page_title="투자", layout="wide")
+st.set_page_config(page_title="LendSure 투자상품", layout="wide")
 
 
 # 네비게이션 바
@@ -25,7 +25,7 @@ st.markdown(
 st.markdown(
     """
     <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: white;">LENDIT</a>
+        <a href="/" style="text-decoration: none; color: white;">LENDSURE</a>
     </div>
     """,
     unsafe_allow_html=True
@@ -37,8 +37,8 @@ st.markdown(
     """
     <div style="background-color:#9bb2e8; padding: 100px; display: flex; align-items: center;">
         <div style="flex: 1;">
-            <h2>수익성과 안정성의 밸런스를 찾은 투자</h2>
-            <p>데이터로 입증된 투자,렌딧과 함께 수익성과 안정성을 극대화하세요!</p>
+            <h2>수익성과 안정성을 모두 고려한 렌드슈어의 투자</h2>
+            <p>데이터로 입증된 투자,렌드슈어와 함께 수익성과 안정성을 극대화하세요!</p>
         </div>
         <div style="flex: 1; text-align: right;">
         <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" class="header-icon">

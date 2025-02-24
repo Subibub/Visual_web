@@ -2,11 +2,12 @@ import streamlit as st
 import json
 import os
 from streamlit_lottie import st_lottie
+import time
 
 
 
 # 페이지 기본 설정
-st.set_page_config(page_title="LendingClub", layout="wide")
+st.set_page_config(page_title="LendSure", layout="wide")
 
 # 초기 세션 상태 설정
 if "show_login" not in st.session_state:
@@ -27,13 +28,14 @@ def load_lottie(filepath: str):
 
 # JSON 파일 로드 (data 폴더 안의 animation.json 파일 사용)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATH = os.path.join(BASE_DIR, "data", "animation.json")
+FILE_PATH = os.path.join(BASE_DIR, "data", "Animation(donut).json")
 lottie_animation = load_lottie(FILE_PATH)
 
 # CSS 스타일 적용 (스크롤 가능한 섹션 UI)
 st.markdown("""
     <style>   
         html, body {
+            font-family : "Poppins'. sans-serif;
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             height: 100vh;
@@ -57,7 +59,7 @@ st.markdown("""
             flex-direction: column;
             justify-content: center;
         }
-        .container {
+        .container0{
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -65,28 +67,7 @@ st.markdown("""
             text-align: center;
             padding: 30px 0;
         }
-        .left-section {
-            width: 40%;
-            text-align: left;
-        }
-        .right-section {
-            width: 40%;
-            text-align: left;
-        }
-        .title {
-            font-size: 30px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: -40px; /* 중앙보다 살짝 위로 이동 */
-        }
-
-        .subtitle {
-            font-size: 18px;
-            color: #666;
-            max-width: 600px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
+        
         .button {
             background-color: #1E40AF;
             color: white;
@@ -129,13 +110,11 @@ st.markdown("""
         .card:hover {
             transform: translateY(-10px);
         }
-        .top-bg {
+        .top-bg1 {
+            text-align: center;
             background-color: white;
-            color: black;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            padding: 60px 20px;
+            border-radius: 10px;
         }
         .bottom-section {
             height: 100vh;
@@ -247,11 +226,31 @@ st.markdown("""
             font-size: 18px;
             color: gray;
         }
-        .animation-container {
+        .container {
             display: flex;
-            justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            justify-content: space-between; /* 좌우 배치 */
+            gap: 50px;
+            padding: 60px 20px;
+            width: 100%;
+        }
+        .animation-container {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            align-items: center;
+            align-self: flex-start; /* 컨테이너 내에서 왼쪽 정렬 */
+        }
+        .animation-container canvas {
+            max-width: 600px;
+            height: auto;
+            margin-left: 0 !important; /* 중앙 정렬을 강제로 해제하고 왼쪽 정렬 */
+        }
+        .left-section {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            align-items: center;
         }
         
     </style>
@@ -272,6 +271,7 @@ st.markdown(f"""
             font-size: 24px;
             font-weight: bold;
             color: white;
+            font-family: "Alegreya", serif;
         }}
         .nav-links {{
             display: flex;
@@ -326,7 +326,9 @@ st.markdown(f"""
     </style>
 
     <div class="navbar">
-        <div class="logo">LendingClub</div>
+        <div class="logo">
+            LendSure
+        </div>
         <div class="nav-links">
             <span class="nav-item">대출
                 <div class="dropdown">
@@ -334,12 +336,15 @@ st.markdown(f"""
                     <a href="/dashboard" target = "_self">시각화</a>
                 </div>
             </span>
-            <a href="/product" target = "_self">투자</a>
+            <a href="/invest" target = "_self">투자</a>
             <a href="/cs" target = "_self">고객상담</a>
             <a href="?login=true" class="nav-link">로그인</a>
         </div>
     </div>
-""", unsafe_allow_html=True)
+    """, 
+unsafe_allow_html=True,
+)
+
 
     
 #------------로그인 폼 및 로그아웃 처리------------------#
@@ -361,9 +366,7 @@ if st.session_state.show_login and not st.session_state.logged_in:
             st.session_state.show_login = False
             st.success("로그인 성공! 회사 페이지로 이동합니다.")
             time.sleep(1)  # Give time for the success message to show
-            st.experimental_set_query_params()  # Clear query parameters
-            st.rerun()  # Rerun the app
-            scriptrunner.StopException()
+            st.query_params.clear()  # Clear query parameters
             st.switch_page("pages/company.py")
 
 
@@ -372,22 +375,70 @@ if st.session_state.show_login and not st.session_state.logged_in:
 # --------------상단 섹션: 회사 정보 (회사명 & 슬로건)------------------#
 # 상단 섹션 : 회사 정보 (회사명 & 슬로건)
 st.markdown("""
-    <div id="top" class="section top-bg">
-        <h1>LendingClub</h1>
-        <p>신뢰할 수 있는 금융 파트너, 더 나은 미래를 함께합니다.</p>
-        <a href="loan_product" class="nav-link" style="background-color: #08298A; padding: 15px 30px; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;">대출 상품 보기</a>
+    <style>
+        .top-bg {
+            text-align: center;
+            background-color: white;
+            padding: 80px 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+    
+        }
+        .top-bg h1 {
+            font-family:"Alegreya", serif;
+            font-size: 80px;
+            font-weight: bold;
+            color: #08298A;
+            margin-bottom: 15px;
+        }
+        .top-bg p {
+            font-family:   font-family: "Gowun Dodum", serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 26px;
+            color:gray;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .top-bg a {
+            background-color: #08298A;
+            padding: 18px 35px;
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+            border-radius: 25px;
 
+
+            transition: background-color 0.3s ease-in-out;
+        }
+        .top-bg a:hover {
+            background-color: #06417d;
+        }
+        [data-testid="stHeaderActionElements"] {
+            display: none !important;
+        }
+    </style>         
+    
+    <div id="top" class="section top-bg">
+        <h1>LendSure</h1>
+        <p>신뢰할 수 있는 금융 파트너, 당신과 함께합니다.</p>
+        <a href="loan_product" class="nav-link">대출 상품 보기</a>
     </div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 # --------------중단 섹션: 대출 상품 캐러셀------------------#
 # UI 레이아웃
 st.markdown('<div class="container">', unsafe_allow_html=True)
 
-# 오른쪽 애니메이션 영역 (크기 조정 + 정렬 개선)
-st.markdown('<div class="animation-container">', unsafe_allow_html=True)
+# 왼쪽 애니메이션 영역 (크기 조정 + 정렬 개선)
+st.markdown('<div class="left-section">', unsafe_allow_html=True)
 if lottie_animation:
-    st_lottie(lottie_animation, speed=1, height=350, key="investment_graph")  # 크기 조정 (height=350)
+    st_lottie(lottie_animation, speed=1, height=500, key="investment_graph")  # 크기 조정 (height=350)
 else:
     st.warning("애니메이션을 표시할 수 없습니다. JSON 파일을 확인하세요.")
 st.markdown('</div>', unsafe_allow_html=True)
@@ -400,9 +451,29 @@ st.markdown('<div class="right-section">', unsafe_allow_html=True)
 
 st.markdown(
     """
+    <style>
+        .title {
+            font-size: 50px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: -40px; /* 중앙보다 살짝 위로 이동 */
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .right-section {
+            width: 40%;
+            text-align: left;
+        }
+    </style>
     <div class="title">분산투자를 통한 안정적인 투자</div>
     <div class="subtitle">
-        렌딧에서는 분산투자가 가능하여 <br>
+        렌드슈어에서는 분산투자가 가능하여 <br>
         투자의 안정성과 수익성이 높아집니다.
     </div>
     """,
@@ -430,7 +501,7 @@ st.write("")
 st.write("")
 st.write("")
 
-st.markdown('<p class="big-font">렌딧의 현재</p>', unsafe_allow_html=True)
+st.markdown('<p class="big-font">렌드슈어의 현재</p>', unsafe_allow_html=True)
 
 # 원형 통계
 st.markdown(
@@ -443,9 +514,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.write("")
 # 날짜 정보
-st.markdown('<p class="footer">렌딧 내부 데이터 기준 (2025년 2월 23일)</p>', unsafe_allow_html=True)
-
+st.markdown('<p class="footer">렌드슈어 내부 데이터 기준 (2025년 2월 23일)</p>', unsafe_allow_html=True)
 # 버튼
 st.markdown(
     """
@@ -469,7 +540,12 @@ st.markdown(
 st.write("")
 st.write("")
 st.write("")
-
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
 # 하단 화면 - 회사 소개 및 고객 지원
 st.markdown('<p class="footer">고객센터: 1234-1234 | E-mail: support@LSB.co.kr</p>', unsafe_allow_html=True)
 st.markdown('<p class="footer">대표: 이수빈 | 사업자등록번호: 123-123-123</p>', unsafe_allow_html=True)

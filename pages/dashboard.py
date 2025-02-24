@@ -45,10 +45,10 @@ st.markdown(
 st.markdown(
     """
     <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: black;">LENDIT</a>
+        <a href="/" style="text-decoration: none; color: black;">LENDSURE</a>
     </div>
     <div class="sub-navbar">
-        LendingClub 시각화
+        LendSure 고객정보
     </div>
     <br><br><br><br>
     """,

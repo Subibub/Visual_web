@@ -49,7 +49,7 @@ st.markdown(
     }}
     </style>
     <div class="top-nav">
-        <a href="/" style="text-decoration: none; color: black;">LENDIT</a>
+        <a href="/" style="text-decoration: none; color: black;">LENDSURE</a>
     </div>
     <div class="step-nav">
         <div class="step-container">
