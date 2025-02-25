@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="대출 상담 분석 대시보드-LendSure", layout="wide")
+st.set_page_config(page_title="대출 상담 분석 대시보드-LendSure", layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,10 +16,12 @@ init_login_state()  # 세션 상태 초기화
 # 네비게이션 바 표시
 load_navbar()
 
+
 if st.session_state["logged_in"]:
     st.title(f"admin님, 환영합니다!")
 else:
     st.title("환영합니다! 로그인해 주세요.")
+
 
 #=====================================================================================
 # Streamlit 멀티페이지 설정
@@ -108,12 +110,13 @@ elif page == "고객 세부 정보":
     # 대출 상태 시각화 (산점도로 변경, 0과 1만 표시 + 선택 고객 강조)
     st.subheader("대출 상태 산점도")
     df_filtered = df[df["loan_status"].isin([0, 1])]  # 0과 1만 필터링
-    
+    df_filtered["loan_status"] = df_filtered["loan_status"].astype(str)  # ✅ 숫자를 문자형(str)으로 변환
+
     fig = px.scatter(df_filtered, x="loan_amnt", y="fico_avg", color="loan_status", 
                      title="대출 금액 vs 신용 점수 (대출 상태별)",
                      labels={"loan_amnt": "대출 금액 ($)", "fico_avg": "신용 점수", "loan_status": "대출 상태"},
                      size_max=10, opacity=0.7,
-                     color_discrete_sequence=["green"]  # ✅ 연한 초록 -> 중간 초록 -> 진한 초록
+                     color_discrete_sequence=["#b2df8a", "#006400"]  # ✅ 연한 초록 -> 중간 초록 -> 진한 초록
 
                      )
     
@@ -154,7 +157,7 @@ if page == "기타 분석":
         
         df["estimated_issue_year"] = 2025 - (df["term_numeric"] / 12)  # 대출 기간을 기준으로 발생 연도 추정
         
-        fig_contour = px.density_contour(df, x="loan_amnt", y="fico_avg", color="estimated_issue_year", title="연도별 대출 금액 분포 (각 등고선 = 동일 연도)")
+        fig_contour = px.density_contour(df, x="loan_amnt", y="fico_avg", color="estimated_issue_year", title="연도별 대출 금액 분포 (각 등고선 = 동일 연도)",color_discrete_sequence=["green"])
         
         st.plotly_chart(fig_contour, use_container_width=True)
     else:

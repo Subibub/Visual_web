@@ -8,7 +8,7 @@ import time
 
 
 # 페이지 기본 설정
-st.set_page_config(page_title="LendSure", layout="wide")
+st.set_page_config(page_title="LendSure", layout="wide", page_icon="🛡️",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -23,20 +23,6 @@ handle_logout()
 
 
 #----------------------------------------------------------
-# Lottie 애니메이션 로드 함수
-def load_lottie(filepath: str):
-    try:
-        with open(filepath, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        st.error(f"파일을 찾을 수 없습니다: {filepath}")
-        return None
-
-# JSON 파일 로드 (data 폴더 안의 animation.json 파일 사용)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATH = os.path.join(BASE_DIR, "data", "Animation(donut).json")
-lottie_animation = load_lottie(FILE_PATH)
-
 # CSS 스타일 적용 (스크롤 가능한 섹션 UI)
 st.markdown("""
     <style>   
@@ -194,7 +180,7 @@ st.markdown("""
             color: white;
         }
         .green {
-            background-color: #4cc9a2;
+            background-color: #088A4B;
             margin-right: 20px;
         }
         .blue {
@@ -232,11 +218,12 @@ col1, col2 = st.columns(2)
 with col1:
     st.image("data/invest.png", use_container_width=True)
 
-# Right column: text and button
+# Right column: text
 with col2:
     st.markdown("## 분산투자를 통한 안정적인 투자")
     st.markdown("렌드슈어에서는 분산투자가 가능하여\n투자의 안정성과 수익성이 높아집니다.")
-    st.button("투자 상품 보기")
+    st.markdown("적은 금액으로도 다수의 대출 건에 분산 투자하여 효율적으로 포트폴리오를 구축할 수 있습니다.") 
+
 
 # Custom CSS for styling
 st.markdown("""
@@ -283,7 +270,7 @@ st.markdown(
 st.write("")
 # 날짜 정보
 st.markdown('<p class="footer">렌드슈어 내부 데이터 기준 (2025년 2월 23일)</p>', unsafe_allow_html=True)
-st.markdown('<p class = "sub-text">렌드슈어는 지금도 성장하고 있습니다.</p>', unsafe_allow_html=True)
+st.markdown('<p class = "sub-text">더 나은 금융을 향해, 렌드슈어는 오늘도 도전합니다.</p>', unsafe_allow_html=True)
 
 
 

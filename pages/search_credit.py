@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 # 페이지 설정
-st.set_page_config(page_title="금리•한도조회-LendSure", layout="wide")
+st.set_page_config(page_title="금리•한도조회-LendSure", layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -121,8 +121,8 @@ elif st.session_state["step"] == 4:
     st.subheader("4️⃣결과 확인")
     
     def calculate_loan_rate_and_limit(income, emp_length, emp_type):
-        base_rate = 5.0  # 기본 금리
-        loan_limit = income * 0.4  # 기본 대출 한도
+        base_rate = 5.0  # 기본 금리 (신용대출일 경우 3-8% 금리를 제공하므로 5%로 설정)
+        loan_limit = income * 0.4  # 기본 대출 한도 임금의 70%~250% 정도 대출하는데 p2p 대출은 중금리 전용이라서 조금 낮게 설정 
         
         if emp_length == "10년 이상":
             base_rate -= 0.5

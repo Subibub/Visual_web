@@ -7,7 +7,7 @@ import os
 from streamlit_lottie import st_lottie
 
 
-st.set_page_config(page_title="고객센터-LendSure", page_icon="📞", layout="wide")
+st.set_page_config(page_title="고객센터-LendSure", page_icon="📞", layout="wide",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -142,4 +142,4 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 전화 상담 버튼
-st.markdown('<a href="tel:15991111" class="call-button">📞 전화 상담 예약 09:00 ~ 18:00</a>', unsafe_allow_html=True)
+st.markdown('<a href="tel:01056291003" class="call-button">📞 전화 상담 예약 09:00 ~ 18:00</a>', unsafe_allow_html=True)

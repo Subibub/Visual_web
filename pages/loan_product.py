@@ -7,7 +7,7 @@ import requests
 from streamlit_lottie import st_lottie
 
 # 페이지 설정
-st.set_page_config(page_title="대출 상품-LendSure", layout="wide")
+st.set_page_config(page_title="대출 상품-LendSure", layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -146,7 +146,7 @@ for row in rows:
 
 
 #  대출 시뮬레이션 기능
-with st.expander("📊 대출 시뮬레이션 "):
+with st.expander("➗대출 상환금 계산기➗"):
     st.subheader("💰 대출 상환금 계산")
     loan_amt = st.number_input("대출 금액 (만원)", min_value=100, max_value=10000, value=1000)
     interest_rate = st.slider("연 이자율 (%)", min_value=1.0, max_value=20.0, value=5.0, step=0.1)

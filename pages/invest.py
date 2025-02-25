@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 # 페이지 설정
-st.set_page_config(page_title="투자상품-LendSure", layout="wide")
+st.set_page_config(page_title="투자상품-LendSure", layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -28,19 +28,6 @@ handle_logout()
 plt.rc('font', family='AppleGothic')  # MacOS
 
 
-file_path = '/Users/isubin/VW/data/hand.json'
-
-# JSON 파일 불러오기 함수
-def load_lottie_json(filepath: str):
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        st.error(f"파일을 찾을 수 없습니다: {filepath}")
-        return None
-
-# Lottie 애니메이션 불러오기
-lottie_animation = load_lottie_json(file_path)
 
 
 st.markdown(
@@ -148,7 +135,7 @@ df["유효담보비율"] = df["유효담보비율"].astype(float)
 
 
 # 수익 시뮬레이션
-with st.expander("수익 시뮬레이션 열기/닫기"):
+with st.expander("✖️수익 계산기✖️"):
     st.subheader("수익 시뮬레이션")
     invest_amt = st.number_input("투자 금액 (만원)", min_value=10, max_value=10000, value=1000)
     annual_return= st.slider("예상 연 수익률 (%)", min_value=5.0, max_value=20.0, value=10.0, step=0.1)

@@ -10,7 +10,7 @@ import altair as alt
 import plotly.graph_objects as go
 
 # 페이지 설정
-st.set_page_config(page_title="대출 데이터 대시보드-LendSure",layout="wide")
+st.set_page_config(page_title="대출 데이터 대시보드-LendSure",layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
 
 # 로그인 상태 초기화
 init_login_state()
@@ -130,6 +130,10 @@ st.markdown(f"""
 st.write("")
 st.write("")
 #------------------대출금액, 이자율 확인해보기-------------------------
+# 한국 신용점수 → 미국 FICO 점수 변환 함수
+def korean_to_fico(korean_score):
+    return ((korean_score - 1) / 999) * 550 + 300
+
 # 팝업 창 - 신용 점수 입력
 if "popup" not in st.session_state:
     st.session_state.popup = False
@@ -139,11 +143,13 @@ if st.button("나의 신용 점수 입력"):
 
 if st.session_state.popup:
     with st.form("user_info_form"):
-        fico_score = st.slider("내 신용 점수 입력", 300, 850, 700)
+        korean_score = st.slider("내 신용 점수 입력 (한국 기준)", 1, 1000, 700)  # 한국 신용점수 입력
         submitted = st.form_submit_button("확인")
+
         if submitted:
             st.session_state.popup = False
-            
+            fico_score = round(korean_to_fico(korean_score))
+
             # ±10 범위 내 신용 점수 데이터 찾기
             filtered_df = df[(df["fico_avg"] >= fico_score - 10) & (df["fico_avg"] <= fico_score + 10)]
             
@@ -194,9 +200,18 @@ fig2_1 = px.scatter(df, x="fico_avg", y="int_rate", color="loan_amnt",
 col1.plotly_chart(fig2_1)
 
 avg_values = df.groupby("grade").agg({"loan_amnt": "mean", "int_rate": "mean"}).reset_index()
-fig2_2 = px.bar(avg_values, x="grade", y=["loan_amnt", "int_rate"], barmode="group",
-              title="등급별 평균 대출 금액 & 평균 이자율",
-              width=400, height=400)
+#  데이터를 long format으로 변환
+avg_values_melted = avg_values.melt(id_vars="grade", var_name="Category", value_name="Value")
+
+# 그룹형 바 차트 생성 (이자율 & 대출 금액)
+fig2_2 = px.bar(avg_values_melted, 
+                x="grade", 
+                y="Value", 
+                color="Category",  # ✅ 카테고리(이자율, 대출 금액)로 색상 구분
+                barmode="group",  # ✅ 그룹형 바 차트
+                title="등급별 평균 대출 금액 & 평균 이자율",
+                width=500, height=400)
+
 col2.plotly_chart(fig2_2)
 
 # 평행 좌표 그래프 생성
@@ -219,8 +234,8 @@ fig3_1 = px.parallel_coordinates(filtered_df,
 
 # 그래프 크기 및 제목 조정
 fig3_1.update_layout(title_text="LendingClub 대출 특성 평행 좌표 그래프",
-                     font_size=14, title_font_size=16, height=500)
-st.plotly_chart(fig3_1)
+                     font_size=12, title_font_size=16, height=500,title_y=1.0)
+st.plotly_chart(fig3_1,use_container_width=True)
 
 #-------------------------------------------
 # 2.대출 목적(Treemap) & 주택 소유별 대출 금액
@@ -380,7 +395,7 @@ fig.update_layout(
 st.plotly_chart(fig)
 
 #-------------------------------------------
-# 6. 대출 금액별 연간 소득 분포 (박스플롯)
+# 6. 대출 금액별 연간 소득 분포 (바이올린플롯)
 st.subheader("대출 금액별 연간 소득 분포")
 # 연소득을 일정 구간으로 나누기
 bins = [0, 50000, 100000, 150000, 200000, 300000, df["annual_inc"].max()]
@@ -400,7 +415,7 @@ st.plotly_chart(fig9)
 
 # 대출받고 싶어요 버튼 (누르면 상품 소개 페이지로 이동)
 if st.button("💳 대출 받고 싶어요!"):
-    st.switch_page("pages/product.py")  # ✅ 상품 소개 페이지로 이동
+    st.switch_page("pages/loan_product.py")  # ✅ 상품 소개 페이지로 이동
 
 
 # 🔙 홈으로 돌아가는 버튼

@@ -80,7 +80,7 @@ def load_navbar():
                     <div class="dropdown">
                         <a href="/search_credit" target = "_self">간단한 금리 및 한도 조회</a>
                         <a href="/loan_product" target = "_self">대출상품</a>
-                        <a href="/dashboard" target = "_self">시각화</a>
+                        <a href="/dashboard" target = "_self">고객 인사이트 제공</a>
                     </div>
                 </span>
                 <a href="/invest" target = "_self">투자</a>
