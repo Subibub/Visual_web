@@ -4,7 +4,8 @@ from login_handler import init_login_state, handle_login, handle_logout # 로그
 import time
 import pandas as pd
 import requests
-from streamlit_lottie import st_lottie
+import sqlite3
+
 
 # 페이지 설정
 st.set_page_config(page_title="대출 상품-LendSure", layout="wide",page_icon="🛡️",initial_sidebar_state="collapsed")
@@ -18,18 +19,6 @@ load_navbar()
 # 로그인 / 로그아웃 처리
 handle_login()
 handle_logout()
-
-
-# Lottie 애니메이션 불러오기
-lottie_url = "https://assets3.lottiefiles.com/packages/lf20_kxsd2ytq.json"
-
-def load_lottie(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-lottie_animation = load_lottie(lottie_url)
 
 
 
@@ -51,16 +40,42 @@ st.markdown(
 st.markdown("<br>", unsafe_allow_html=True)
 
 
+# DB에서 상품 데이터 가져오기 
+def get_product_data_from_db():
+    conn = sqlite3.connect("/Users/isubin/VW/data/products.db")
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 상품명, 플랫폼수수료, 최저금리, 최대금리, 최소한도, 최대한도 FROM products
+    """
+    
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if rows:
+        columns = ["상품명", "플랫폼 수수료", "최저금리", "최대금리", "최소한도", "최대한도"]
+        return pd.DataFrame(rows, columns=columns)
+    else:
+        return None
 
-# 상품 데이터 업데이트
+# DB에서 데이터 가져오기
+df = get_product_data_from_db()
+
+# DB 데이터 없을 경우 기본 데이터 사용
 data = {
-    "상품명": ["개인신용대출", "직장인신용대출", "부동산 담보 대출", "소상공인 대출", "자동차 담보 대출"],
-    "플랫폼 수수료": ["연 2% 이내", "최대 연 5%", "연 1.7%", "연 2.4%", "연 2~6% 이내"],
-    "최저금리": ["연 5.0%", "연 4.21%", "연 5.0%", "연 7.0%", "연 4.0%"],
-    "최대금리": ["연 18.0%", "연 17.9%", "연 9%", "연 15%", "연 8%"],
-    "최소한도": ["100만 원", "200만 원", "-", "-", "-"],
-    "최대한도": ["1억 원", "5,000만 원", "최대 10억 원", "최대 2억 원", "최대 1억 원"]
+        "상품명": ["개인신용대출", "직장인신용대출", "부동산 담보 대출", "소상공인 대출", "자동차 담보 대출"],
+        "플랫폼 수수료": ["연 2% 이내", "최대 연 5%", "연 1.7%", "연 2.4%", "연 2~6% 이내"],
+        "최저금리": ["연 5.0%", "연 4.21%", "연 5.0%", "연 7.0%", "연 4.0%"],
+        "최대금리": ["연 18.0%", "연 17.9%", "연 9%", "연 15%", "연 8%"],
+        "최소한도": ["100만 원", "200만 원", "-", "-", "-"],
+        "최대한도": ["1억 원", "5,000만 원", "최대 10억 원", "최대 2억 원", "최대 1억 원"]
 }
+
+# DB 데이터 없을 경우 기본 데이터 사용 
+if df is None:
+   df = pd.DataFrame(data)
+
 
 # 상품별 맞춤 아이콘 매칭
 icon_urls = {
@@ -71,7 +86,6 @@ icon_urls = {
     "자동차 담보 대출": "https://img.icons8.com/ios-filled/50/4A90E2/car.png",
 }
 
-df = pd.DataFrame(data)
 
 # 스타일 설정 (가로 2개씩 배치)
 st.markdown("""

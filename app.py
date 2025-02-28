@@ -3,7 +3,6 @@ from navigation import load_navbar  # 공통 네비게이션 바 불러오기
 from login_handler import init_login_state, handle_login, handle_logout # 로그인 처리 함수 불러오기
 import json
 import os
-from streamlit_lottie import st_lottie
 import time
 
 

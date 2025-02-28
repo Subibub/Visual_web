@@ -27,7 +27,7 @@ handle_logout()
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("data/lendingclub_data.csv")  # 데이터 폴더에서 로드
+        df = pd.read_csv("data/Customer_data.csv")  # 데이터 폴더에서 로드
     except FileNotFoundError:
         df = pd.DataFrame({
             "annual_inc": [50000, 60000, 70000, 80000, 90000],
@@ -207,8 +207,8 @@ avg_values_melted = avg_values.melt(id_vars="grade", var_name="Category", value_
 fig2_2 = px.bar(avg_values_melted, 
                 x="grade", 
                 y="Value", 
-                color="Category",  # ✅ 카테고리(이자율, 대출 금액)로 색상 구분
-                barmode="group",  # ✅ 그룹형 바 차트
+                color="Category",  #  카테고리(이자율, 대출 금액)로 색상 구분
+                barmode="group",  # 그룹형 바 차트
                 title="등급별 평균 대출 금액 & 평균 이자율",
                 width=500, height=400)
 
@@ -218,10 +218,12 @@ col2.plotly_chart(fig2_2)
 # 사용자가 보고 싶은 신용 점수 범위 선택
 fico_min, fico_max = st.slider("신용 점수 범위 선택", min_value=int(df["fico_avg"].min()), 
                                max_value=int(df["fico_avg"].max()), value=(650, 800))
-
 # 선택한 신용 점수 범위로 데이터 필터링
 filtered_df = df[(df["fico_avg"] >= fico_min) & (df["fico_avg"] <= fico_max)]
-
+st.write("")
+st.write("")
+st.write("")
+st.write("")
 # 평행 좌표 그래프 생성 (신용 점수를 색상 기준으로 설정)
 fig3_1 = px.parallel_coordinates(filtered_df,
                                  dimensions=["loan_amnt", "int_rate", "dti", "fico_avg"],
@@ -415,9 +417,9 @@ st.plotly_chart(fig9)
 
 # 대출받고 싶어요 버튼 (누르면 상품 소개 페이지로 이동)
 if st.button("💳 대출 받고 싶어요!"):
-    st.switch_page("pages/loan_product.py")  # ✅ 상품 소개 페이지로 이동
+    st.switch_page("pages/loan_product.py")  #  상품 소개 페이지로 이동
 
 
 # 🔙 홈으로 돌아가는 버튼
 if st.button("🔙 홈으로 돌아가기"):
-    st.switch_page("app.py")  # ✅ 홈으로 이동
+    st.switch_page("app.py")  # 홈으로 이동

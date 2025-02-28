@@ -11,16 +11,18 @@ cursor = conn.cursor()
 
 # 📌 대출 상품 테이블 생성
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS loan_products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    rate TEXT,
-    description TEXT,
+CREATE TABLE IF NOT EXISTS products (
+    상품명 TEXT PRIMARY KEY,
+    플랫폼수수료 TEXT,
+    최저금리 TEXT,
+    최대금리 TEXT,
+    최소한도 TEXT,
+    최대한도 TEXT
 )
 """)
 
 # 📌 샘플 데이터 삽입 (중복 방지)
-cursor.execute("SELECT COUNT(*) FROM loan_products")
+cursor.execute("SELECT COUNT(*) FROM products")
 if cursor.fetchone()[0] == 0:
     sample_products = [
         ("개인 신용 대출", "연 4.5%", "신용 등급에 따라 차등 적용"),

@@ -30,7 +30,7 @@ page = st.sidebar.radio("이동할 페이지를 선택하세요", ["대출 개�
 
 # 데이터 로드 함수
 def load_data():
-    file_path = "/Users/isubin/VW/data/data_preprocessed_v4.csv"
+    file_path = "/Users/isubin/VW/data/User_data.csv"
     
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}. Check the path and try again.")
