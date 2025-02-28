@@ -17,9 +17,6 @@
 │   ├── logo.png        # 이미지 및 리소스
 │   ├── Customer_data.csv     # 고객관련 데이터
 │   ├── User_data.csv     # 회사관련 데이터 (데이터가 더 많이 가공됨)
-
-
-
 │
 ├── pages               # Streamlit 웹 애플리케이션 페이지
 │   ├── company.py      # 회사가 필요한 정보 시각화 페이지 
